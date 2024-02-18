@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Point Of Sale
+  description: This is API Specification for point of sale
+  termsOfService: https://example.com/terms-of-service
+  contact:
+    name: Echo Edy P
+    email: mailto:eep@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/EkoEdyPurwanto/point-of-sale/blob/main/LICENSE
+  x-custom-filed: https://www.buymeacoffee.com/ekoedypurwanto
+  version: 1.0.0
+externalDocs:
+  description: source code
+  url: https://github.com/EkoEdyPurwanto/point-of-sale
+servers:
+  - url: 'https://{environment}.localhost:{port}/api/{basePath}'
+    description: point of sale RESTfulAPi servers
+    variables:
+      environment:
+        description: Server Environment
+        default: development
+        enum:
+          - development
+          - staging
+          - production
+      port:
+        description: Port Number
+        default: '1323'
+        enum:
+          - '1323'
+          - '8443'
+          - '443'
+      basePath:
+        description: Base Path
+        default: v1
+components:
+  securitySchemes:
+    PointOfSaleAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT authorization
+  schemas:
+    userAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+        password:
+          type: string
+        passwordConfirm:
+          type: string
+paths:
+  /auth/register:
+    post:
+      security:
+        - PointOfSaleAuth: []
+      tags:
+        - Auth
+        - Admin
+      summary: register admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifier:
+
+
+
+      responses:
+        201:
+          description: you have successfully registered as admin
+
+
+  
