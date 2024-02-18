@@ -50,38 +50,121 @@ components:
           type: string
         username:
           type: string
+        password:
+          type: string
         email:
           type: string
           format: email
         phoneNumber:
           type: string
+        accountStatus:
+          type: string
+          enum:
+            - active
+            - inactive
+            - blocked
+            - other
+          default: aktif
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    # REGISTER ADMIN
+    registerAdmin:
+      type: object
+      properties:
+        identifier:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            phoneNumber:
+              type: string
+        username:
+          type: string
         password:
           type: string
         passwordConfirm:
           type: string
+#          LOGIN ADMIN
+    loginAdmin:
+      type: object
+      properties:
+        identifier:
+          type: object
+          properties:
+            username:
+              type: string
+            email:
+              type: string
+              format: email
+            phoneNumber:
+              type: string
+        password:
+          type: string
+
+
+
+
+
 paths:
+  #  REGISTER ADMIN
   /auth/register:
     post:
       security:
-        - PointOfSaleAuth: []
+        - PointOfSaleAuth: [ ]
       tags:
         - Auth
         - Admin
       summary: register admin
+      description: create new user admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                identifier:
-
-
-
+              $ref: '#/components/schemas/registerAdmin'
+            examples:
+              email:
+                description: example register use email
+                value:
+                  identifier: user@mail.com
+                  username: user
+                  password: password123
+                  passwordConfirm: password123
+              phoneNumber:
+                description: example register use email
+                value:
+                  identifier: 089653168345
+                  username: user
+                  password: password123
+                  passwordConfirm: password123
       responses:
         201:
           description: you have successfully registered as admin
-
-
-  
+        400:
+          description: bad request
+  #          LOGIN ADMIN
+  /auth/login:
+    post:
+      tags:
+        - Auth
+        - Admin
+      summary: login admin
+      description: login as admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginAdmin'
+      responses:
+        200:
+          description: you have successfully login as admin
+        401:
+          description: unauthorized invalid credential
+        406:
+          description: your account is inactive
