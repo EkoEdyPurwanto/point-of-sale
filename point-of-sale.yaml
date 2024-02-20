@@ -76,7 +76,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-    # REGISTER USER ACCOUNT
+    # REGISTER USER ACCOUNT jadikan identifier harus di isi salah satu: email or phone number
     registerUserAccount:
       type: object
       properties:
@@ -96,7 +96,13 @@ components:
           type: string
         passwordConfirm:
           type: string
-    # LOGIN USER ACCOUNT
+      required:
+        - identifier
+        - role
+        - username
+        - password
+        - passwordConfirm
+    # LOGIN USER ACCOUNT jadikan identifier harus di isi salah satu: username or email or phone number
     loginUserAccount:
       type: object
       properties:
@@ -112,17 +118,10 @@ components:
               type: string
         password:
           type: string
-
-
-
-
-
 paths:
   # REGISTER ADMIN
   /auth/register/admin:
     post:
-      security:
-        - PointOfSaleAuth: [ ]
       tags:
         - Auth
         - Admin
@@ -138,7 +137,7 @@ paths:
               email:
                 description: example register use email
                 value:
-                  identifier: user@mail.com
+                  identifier: user@example.com
                   username: user
                   role: admin
                   password: password123
@@ -156,6 +155,7 @@ paths:
           description: you have successfully registered as admin
         400:
           description: bad request
+  # REGISTER CASHIER
   /auth/register:
     post:
       tags:
@@ -191,7 +191,7 @@ paths:
           description: you have successfully registered as cashier
         400:
           description: bad request
-  # LOGIN ADMIN
+  # LOGIN ADMIN jadikan ketika admin berhasil login generate token
   /auth/login/admin:
     post:
       tags:
@@ -208,11 +208,21 @@ paths:
       responses:
         200:
           description: you have successfully login as admin
-#          data token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token for authentication
+                example:
+                  token: your_generated_jwt_token_here
         401:
-          description: unauthorized invalid credential
+          description: unauthorized - invalid credential
         406:
           description: your account is inactive
+  # LOGIN CASHIER
   /auth/login:
     post:
       tags:
@@ -230,6 +240,105 @@ paths:
         200:
           description: you have successfully login as admin
         401:
-          description: unauthorized invalid credential
+          description: unauthorized - invalid credential
         406:
           description: your account is inactive
+  # GET ALL USER CASHIER
+  /user-management/cashier:
+    get:
+      security:
+        - PointOfSaleAuth: [ ]
+      tags:
+        - Admin
+      summary: get all user cashier
+      description: retrieve all user cashier information
+      responses:
+        200:
+          description: success retrieving all user cashier information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/userAccount'
+              examples:
+                success:
+                  description: example success get all user cashier
+                  value:
+                    - id: randomstringbecauseuuid
+                      username: user1
+                      email: user1@example.com
+                      phoneNumber: 08971641117
+                      accountStatus: active
+                      role: cashier
+                      createdAt: 2022-02-20T10:00:00Z
+                      updatedAt: 2022-02-20T10:00:00Z
+                    - id: randomstringbecauseuuid
+                      username: user2
+                      email: user2@example.com
+                      phoneNumber: 08971642217
+                      accountStatus: blocked
+                      role: cashier
+                      createdAt: 2022-02-20T10:00:00Z
+                      updatedAt: 2022-02-20T10:00:00Z
+    # GET USER ACCOUNT BY SOMETHING, like id, username, role, email, phone number.
+  # GET ALL USER ACCOUNT BY IDENTIFIER
+  /user-management/user-account/{identifier}:
+    get:
+      security:
+        - PointOfSaleAuth: [ ]
+      tags:
+        - Admin
+      summary: Get user account by identifier
+      description: Retrieve user account information based on the provided identifier (id, username, role, email, or phone number)
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          description: Identifier of the user account (id, username, role, email, or phone number)
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success retrieving user user account information
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/userAccount'
+                  - $ref: '#/components/schemas/userAccount'
+              examples:
+                successIdentifierByRole:
+                  description: Example success retrieving user account information by role
+                  value:
+                    - id: randomstringbecauseuuid
+                      username: user1
+                      email: user1@example.com
+                      phoneNumber: "08971641117"
+                      accountStatus: active
+                      role: cashier
+                      createdAt: "2022-02-20T10:00:00Z"
+                      updatedAt: "2022-02-20T10:00:00Z"
+                    - id: randomstringbecauseuuid
+                      username: user2
+                      email: user2@example.com
+                      phoneNumber: "08971642217"
+                      accountStatus: active
+                      role: cashier
+                      createdAt: "2022-02-20T10:00:00Z"
+                      updatedAt: "2022-02-20T10:00:00Z"
+                successIdentifierByEmail:
+                  description: Example success retrieving user account information by email
+                  value:
+                    id: randomstringbecauseuuid
+                    username: user1
+                    email: user1@example.com
+                    phoneNumber: "08971641117"
+                    accountStatus: active
+                    role: cashier
+                    createdAt: "2022-02-20T10:00:00Z"
+                    updatedAt: "2022-02-20T10:00:00Z"
+        404:
+          description: User account with the provided identifier not found
