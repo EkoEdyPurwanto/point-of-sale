@@ -43,7 +43,7 @@ components:
       bearerFormat: JWT
       description: JWT authorization
   schemas:
-    userAdmin:
+    userAccount:
       type: object
       properties:
         id:
@@ -65,14 +65,19 @@ components:
             - blocked
             - other
           default: aktif
+        role:
+          type: string
+          enum:
+            - admin
+            - cashier
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
-    # REGISTER ADMIN
-    registerAdmin:
+    # REGISTER USER ACCOUNT
+    registerUserAccount:
       type: object
       properties:
         identifier:
@@ -83,14 +88,16 @@ components:
               format: email
             phoneNumber:
               type: string
+        role:
+          type: string
         username:
           type: string
         password:
           type: string
         passwordConfirm:
           type: string
-#          LOGIN ADMIN
-    loginAdmin:
+    # LOGIN USER ACCOUNT
+    loginUserAccount:
       type: object
       properties:
         identifier:
@@ -111,8 +118,8 @@ components:
 
 
 paths:
-  #  REGISTER ADMIN
-  /auth/register:
+  # REGISTER ADMIN
+  /auth/register/admin:
     post:
       security:
         - PointOfSaleAuth: [ ]
@@ -126,13 +133,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/registerAdmin'
+              $ref: '#/components/schemas/registerUserAccount'
             examples:
               email:
                 description: example register use email
                 value:
                   identifier: user@mail.com
                   username: user
+                  role: admin
                   password: password123
                   passwordConfirm: password123
               phoneNumber:
@@ -140,6 +148,7 @@ paths:
                 value:
                   identifier: 089653168345
                   username: user
+                  role: admin
                   password: password123
                   passwordConfirm: password123
       responses:
@@ -147,8 +156,43 @@ paths:
           description: you have successfully registered as admin
         400:
           description: bad request
-  #          LOGIN ADMIN
-  /auth/login:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+        - Cashier
+      summary: register cashier
+      description: create new user cashier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/registerUserAccount'
+            examples:
+              email:
+                description: example register use email
+                value:
+                  identifier: user@mail.com
+                  username: user
+                  role: cashier
+                  password: password123
+                  passwordConfirm: password123
+              phoneNumber:
+                description: example register use email
+                value:
+                  identifier: 089653168345
+                  username: user
+                  role: cashier
+                  password: password123
+                  passwordConfirm: password123
+      responses:
+        201:
+          description: you have successfully registered as cashier
+        400:
+          description: bad request
+  # LOGIN ADMIN
+  /auth/login/admin:
     post:
       tags:
         - Auth
@@ -160,7 +204,28 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/loginAdmin'
+              $ref: '#/components/schemas/loginUserAccount'
+      responses:
+        200:
+          description: you have successfully login as admin
+#          data token
+        401:
+          description: unauthorized invalid credential
+        406:
+          description: your account is inactive
+  /auth/login:
+    post:
+      tags:
+        - Auth
+        - Cashier
+      summary: login cashier
+      description: login as cashier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginUserAccount'
       responses:
         200:
           description: you have successfully login as admin
