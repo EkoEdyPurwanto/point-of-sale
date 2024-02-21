@@ -342,3 +342,89 @@ paths:
                     updatedAt: "2022-02-20T10:00:00Z"
         404:
           description: User account with the provided identifier not found
+  # CHANGE PASSWORD USER ADMIN
+  /user-management/admin/{id}/password:
+    put:
+      security:
+        - PointOfSaleAuth: [ ]
+      tags:
+        - Admin
+      summary: change pass admin
+      description: change password user admin
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the user admin to change password for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+                confirmPassword:
+                  type: string
+              required:
+                - currentPassword
+                - newPassword
+                - confirmPassword
+      responses:
+        200:
+          description: Password changed successfully
+        400:
+          description: Bad request, invalid input
+        401:
+          description: Unauthorized, authentication failure
+        404:
+          description: User account not found
+        500:
+          description: Internal server error
+  # CHANGE PASSWORD USER CASHIER
+  /user-management/cashier/{id}/password:
+    put:
+      tags:
+        - Cashier
+      summary: change pass cashier
+      description: change password user cashier
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the user cashier to change password for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+                confirmPassword:
+                  type: string
+              required:
+                - currentPassword
+                - newPassword
+                - confirmPassword
+      responses:
+        200:
+          description: Password changed successfully
+        400:
+          description: Bad request, invalid input
+        401:
+          description: Unauthorized, authentication failure
+        404:
+          description: User account not found
+        500:
+          description: Internal server error
